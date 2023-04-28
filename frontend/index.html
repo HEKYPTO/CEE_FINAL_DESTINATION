@@ -6,10 +6,43 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hello</title>
+    <link href="/dist/output.css" rel="stylesheet">
+    <script>
+        function closedPopup() {
+            document.getElementById("popup").style.display = "none";
+        }
+        function showPopup() {
+            document.getElementById("popup").style.display = "block";
+        }
+    </script>
 </head>
 
 <body>
+    <div class="relative justify-center w-screen h-screen">
+        <div class="block w-full h-full">
+            <div class="flex flex-col items-center justify-center">
+                <div class="flex max-w-5xl flex-col w-full">
+                    <div class="flex w-full justify-between">
+                        <p class="text-3xl">MCV TODO-LIST</p>
+                        <input
+                            className="block w-full rounded-md border- py-1.5 border-black text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            placeholder="Search">
+                    </div>
+                </div>
+                <!-- <button class="rounded-full bg-gray-100 p-2" ">Show Popup</button> -->
 
+            </div>
+        </div>
+        <div class="bottom-12 right-12 absolute">
+            <button class="rounded-full p-2 h-12 w-12 bg-green-400" onclick="showPopup()">+</button>
+        </div>
+        <div class="inset-x-40 inset-y-20 rounded-md shadow-md bg-gray-100 absolute" id="popup" style="display: none;">
+            <button class="rounded-full bg-gray-500 w-8 h-8" onclick="closedPopup()">
+                <p class="text-white">X</p>
+            </button>
+        </div>
+
+    </div>
 </body>
 
 </html>
