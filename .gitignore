@@ -3,5 +3,5 @@ package-lock.json
 build
 npm-debug.log
 .nyc
-.env
+*.env
 .DS_Store
