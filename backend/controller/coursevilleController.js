@@ -142,6 +142,7 @@ exports.getCourses = (req, res) => {
 
 // TODO #3.4: Send "GET" request to CV endpoint to get all course assignments based on cv_cid
 exports.getCourseAssignments = (req, res) => {
+  const cv_cid = req.params.cv_cid;
   try {
     const profileOptions = {
       headers: {
@@ -149,7 +150,7 @@ exports.getCourseAssignments = (req, res) => {
       },
     };
     const profileReq = https.request(
-      "https://www.mycourseville.com/api/v1/public/users/me",
+      `https://www.mycourseville.com/api/v1/public/get/course/assignments?cv_cid=${cv_cid}`,
       profileOptions,
       (profileRes) => {
         let profileData = "";
