@@ -11,6 +11,7 @@ router.get(
   "/get_course_assignments/:cv_cid",
   coursevilleController.getCourseAssignments
 );
+router.get("/get_course_info/:cv_cid", coursevilleController.getCourseInfo)
 router.get(
   "/get_assignment_detail/:item_id",
   coursevilleController.getAssignmentDetail

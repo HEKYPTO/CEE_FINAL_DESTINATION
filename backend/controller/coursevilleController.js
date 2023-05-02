@@ -82,7 +82,7 @@ exports.getProfileInformation = (req, res) => {
       },
     };
     const profileReq = https.request(
-      "https://www.mycourseville.com/api/v1/public/users/me",
+      "https://www.mycourseville.com/api/v1/public/get/user/info",
       profileOptions,
       (profileRes) => {
         let profileData = "";
@@ -98,11 +98,13 @@ exports.getProfileInformation = (req, res) => {
     );
     profileReq.on("error", (err) => {
       console.error(err);
+      req.status(500).send(err);
     });
     profileReq.end();
   } catch (error) {
     console.log(error);
     console.log("Please logout, then login again.");
+    res.status(500).send(error)
   }
 };
 
@@ -132,11 +134,13 @@ exports.getCourses = (req, res) => {
     );
     profileReq.on("error", (err) => {
       console.error(err);
+      req.status(500).send(err);
     });
     profileReq.end();
   } catch (error) {
     console.log(error);
     console.log("Please logout, then login again.");
+    res.status(500).send(error)
   }
 };
 
@@ -166,11 +170,13 @@ exports.getCourseAssignments = (req, res) => {
     );
     profileReq.on("error", (err) => {
       console.error(err);
+      req.status(500).send(err);
     });
     profileReq.end();
   } catch (error) {
     console.log(error);
     console.log("Please logout, then login again.");
+    res.status(500).send(error)
   }
 };
 
@@ -200,11 +206,13 @@ exports.getAssignmentDetail = (req, res) => {
     );
     profileReq.on("error", (err) => {
       console.error(err);
+      req.status(500).send(err);
     });
     profileReq.end();
   } catch (error) {
     console.log(error);
     console.log("Please logout, then login again.");
+    res.status(500).send(error)
   }
 };
 
@@ -212,4 +220,39 @@ exports.logout = (req, res) => {
   req.session.destroy()
   res.redirect(`http://${process.env.frontendIPAddress}/index.html`)
   res.end()
+};
+
+exports.getCourseInfo = (req, res) => {
+  const cv_cid = req.params.cv_cid;
+  try {
+    const profileOptions = {
+      headers: {
+        Authorization: `Bearer ${req.session.token.access_token}`,
+      },
+    };
+    const profileReq = https.request(
+      `https://www.mycourseville.com/api/v1/public/get/course/info?cv_cid=${cv_cid}`,
+      profileOptions,
+      (profileRes) => {
+        let profileData = "";
+        profileRes.on("data", (chunk) => {
+          profileData += chunk;
+        });
+        profileRes.on("end", () => {
+          const profile = JSON.parse(profileData);
+          res.send(profile);
+          res.end();
+        });
+      }
+    );
+    profileReq.on("error", (err) => {
+      console.error(err);
+      req.status(500).send(err);
+    });
+    profileReq.end();
+  } catch (error) {
+    console.log(error);
+    console.log("Please logout, then login again.");
+    res.status(500).send(error)
+  }
 };
