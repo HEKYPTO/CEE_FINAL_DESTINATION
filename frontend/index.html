@@ -5,166 +5,139 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello</title>
-    <link href="/dist/output.css" rel="stylesheet">
-    <script>
-        function closedPopup() {
-            document.getElementById("popup").style.display = "none";
-        }
-        function showPopup() {
-            document.getElementById("popup").style.display = "block";
-        }
-    </script>
+    <title>Document</title>
 </head>
 
+<script>
+    const backendIPAddress = "localhost:3000"
+    let username = ""
+
+    const login = () => {
+        window.location.href = `http://${backendIPAddress}/courseville/auth_app`;
+    }
+
+    const logout = () => {
+        window.location.href = `http://${backendIPAddress}/courseville/logout`;
+    }
+
+    const fetchUsername = async () => {
+        const options = {
+            method: "GET",
+            credentials: "include",
+        };
+        await fetch(`http://${backendIPAddress}/courseville/get_profile_info`, options)
+            .then((response) => {
+                if (response.ok)
+                    return response.json()
+                else
+                    throw new Error("not logged in")
+            })
+            .then((data) => {
+                console.log(data)
+                username = data["data"]["student"]["id"]
+            })
+            .catch((error) => console.log(error));
+    }
+
+    /*
+    const options = {
+            method: "GET",
+            credentials: "include",
+        };
+    await fetch(`http://${backendIPAddress}/courseville/get_profile_info`, options)
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data)
+                })
+                .catch((error) => console.log(error));
+    */
+
+    const fetchAssignmentDetail = async (itemId) => {
+        const options = {
+            method: "GET",
+            credentials: "include",
+        };
+        let detail = {}
+        await fetch(`http://${backendIPAddress}/courseville/get_assignment_detail/${itemId}`, options)
+            .then((response) => response.json())
+            .then((data) => {
+                detail = data
+            })
+            .catch((error) => console.log(error));
+        return detail
+    }
+
+    const fetchClassTasks = async (classId) => {
+        const options = {
+            method: "GET",
+            credentials: "include",
+        };
+        let tasks = []
+        await fetch(`http://${backendIPAddress}/courseville/get_course_assignments/${classId}`, options)
+            .then((response) => response.json())
+            .then((data) => {
+                data["data"].map(x => x["itemid"]).forEach(async x => {
+                    const task = await fetchAssignmentDetail(x)
+                    tasks.push({ "date": task["data"]["duedate"], "title": task["data"]["title"], "desc": "" })
+                })
+            })
+            .catch((error) => console.log(error))
+        return tasks
+    }
+
+    const fetchClassName = async (classId) => {
+        const options = {
+            method: "GET",
+            credentials: "include",
+        };
+        let className = ""
+        await fetch(`http://${backendIPAddress}/courseville/get_course_info/${classId}`, options)
+            .then((response) => response.json())
+            .then((data) => {
+                className = data["data"]["title"]
+            })
+            .catch((error) => console.log(error));
+        return className
+    }
+
+    const fetchMCVTasks = async () => {
+        const options = {
+            method: "GET",
+            credentials: "include",
+        };
+        let l = []
+        await fetch(`http://${backendIPAddress}/courseville/get_courses`, options)
+            .then((response) => response.json())
+            .then((data) => {
+                let classes = data["data"]["student"]
+                // console.log(classes)
+                const latest = classes.at(-1)
+                const curSemester = latest["semester"]
+                const curYear = latest["year"]
+                classes.filter(x => x["semester"] == curSemester && x["year"] == curYear).map(x => x["cv_cid"]).map(async x => {
+                    let tasks = await fetchClassTasks(x)
+                    let className = await fetchClassName(x)
+                    tasks.forEach(x => x["desc"] = className)
+                    l = l.concat(tasks)
+                })
+            })
+            .catch((error) => console.log(error));
+        return l
+    }
+
+    const doStuff = async () => {
+        let l = await fetchMCVTasks()
+        // let l = await fetchClassName("32205")
+        // l.sort((a, b) => a["date"] - b["date"])
+        console.log(l)
+    }
+</script>
+
 <body>
+    <button onclick="login()" id="btnLogin">Login</button>
+    <button onclick="logout()" id="btnLogout">Logout</button>
+    <button onclick="doStuff()">Test</button>
 
-    <div class="flex items-center justify-center w-screen">
-        <div class="p-8 w-full md:w-5/6 h-full bg-slate-300">
-            <div class="flex flex-col items-center justify-center">
-                <div class="flex md:max-w-5xl flex-col w-full space-y-4">
-                    <div class="flex w-full justify-between flex-col md:flex-row space-y-4">
-                        <p class="text-3xl">MCV TODO-LIST</p>
-                        <input
-                            class="rounded-md p-1.5 border-black text-gray-900 shadow-sm placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                            placeholder="Search">
-                    </div>
-                    <div class="flex mt-8 space-x-2">
-                        <div class="basis-2/3 flex flex-col rounded-md bg-gray-100 p-4 space-y-4">
-                            <div class="flex flex-col space-y-4">
-                                <h1>Due today</h1>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 1</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 2</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                            </div>
-                            <div class="flex flex-col space-y-4">
-                                <h1>Due in 3 days</h1>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 3</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 4</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 3</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 4</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 3</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 4</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 3</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 4</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 3</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 4</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 3</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 4</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 3</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 4</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 3</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                                <div class="bg-gray-400 w-full p-4">
-                                    <h1>Task 4</h1>
-                                    <p>Gen Chem</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex basis-1/3 flex-col rounded-md bg-gray-100 h-auto p-4">
-                            <p class="text-lg">Filter</p>
-                            <div>
-                                <input type="checkbox">
-                                <label>ABC</label>
-                            </div>
-                            <div>
-                                <input type="checkbox">
-                                <label>ABC</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- <button class="rounded-full bg-gray-100 p-2" ">Show Popup</button> -->
-
-            </div>
-        </div>
-        <div class="bottom-12 right-12 fixed">
-            <button class="flex items-center justify-center rounded-full p-2 h-12 w-12 bg-green-400 text-3xl"
-                onclick="showPopup()">
-                <p class="text-center align-middle">+</p>
-            </button>
-        </div>
-        <div class="inset-x-4 md:inset-x-40 inset-y-20 absolute" id="popup" style="display: none;">
-            <div class="flex items-center justify-center w-full">
-
-                <div class="flex flex-col space-y-2 bg-gray-100 w-full shadow-md p-8 rounded-md max-w-4xl ">
-
-                    <div class="flex justify-between mb-4">
-                        <p class="text-xl">Create Tasks</p>
-                        <button class="rounded-full bg-gray-500 w-8 h-8" onclick="closedPopup()">
-                            <p class="text-white">X</p>
-                        </button>
-                    </div>
-
-                    <!-- <input placeholder=""> -->
-
-                    <input
-                        class="block w-full rounded-md  p-1.5 border-black text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        placeholder="Task Name">
-                    <!-- <input
-                    class="block w-full rounded-md  p-1.5 border-black text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="Description"> -->
-                    <textarea rows="12" placeholder="Description"
-                        class="block w-full rounded-md  p-1.5 border-black text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"></textarea>
-                    <input
-                        class="block w-full rounded-md  p-1.5 border-black text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        type="date">
-                    <div class="flex justify-end">
-                        <button class="rounded-md border-gray-400 px-4 py-2 bg-white">submit</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 
 </html>
