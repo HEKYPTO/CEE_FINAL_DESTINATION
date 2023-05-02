@@ -57,14 +57,9 @@
             method: "GET",
             credentials: "include",
         };
-        let detail = {}
-        await fetch(`http://${backendIPAddress}/courseville/get_assignment_detail/${itemId}`, options)
+        let data = await fetch(`http://${backendIPAddress}/courseville/get_assignment_detail/${itemId}`, options)
             .then((response) => response.json())
-            .then((data) => {
-                detail = data
-            })
-            .catch((error) => console.log(error));
-        return detail
+        return data
     }
 
     const fetchClassTasks = async (classId) => {
@@ -73,15 +68,14 @@
             credentials: "include",
         };
         let tasks = []
-        await fetch(`http://${backendIPAddress}/courseville/get_course_assignments/${classId}`, options)
+        let className = await fetchClassName(classId)
+        let data = await fetch(`http://${backendIPAddress}/courseville/get_course_assignments/${classId}`, options)
             .then((response) => response.json())
-            .then((data) => {
-                data["data"].map(x => x["itemid"]).forEach(async x => {
-                    const task = await fetchAssignmentDetail(x)
-                    tasks.push({ "date": task["data"]["duedate"], "title": task["data"]["title"], "desc": "" })
-                })
-            })
-            .catch((error) => console.log(error))
+        for (let e of data["data"]) {
+            let id = e["itemid"]
+            const task = await fetchAssignmentDetail(id)
+            tasks.push({ "date": task["data"]["duedate"], "title": task["data"]["title"], "desc": className })
+        }
         return tasks
     }
 
@@ -90,14 +84,9 @@
             method: "GET",
             credentials: "include",
         };
-        let className = ""
-        await fetch(`http://${backendIPAddress}/courseville/get_course_info/${classId}`, options)
+        let data = await fetch(`http://${backendIPAddress}/courseville/get_course_info/${classId}`, options)
             .then((response) => response.json())
-            .then((data) => {
-                className = data["data"]["title"]
-            })
-            .catch((error) => console.log(error));
-        return className
+        return data["data"]["title"]
     }
 
     const fetchMCVTasks = async () => {
@@ -105,31 +94,27 @@
             method: "GET",
             credentials: "include",
         };
-        let l = []
-        await fetch(`http://${backendIPAddress}/courseville/get_courses`, options)
+        let data = await fetch(`http://${backendIPAddress}/courseville/get_courses`, options)
             .then((response) => response.json())
-            .then((data) => {
-                let classes = data["data"]["student"]
-                // console.log(classes)
-                const latest = classes.at(-1)
-                const curSemester = latest["semester"]
-                const curYear = latest["year"]
-                classes.filter(x => x["semester"] == curSemester && x["year"] == curYear).map(x => x["cv_cid"]).map(async x => {
-                    let tasks = await fetchClassTasks(x)
-                    let className = await fetchClassName(x)
-                    tasks.forEach(x => x["desc"] = className)
-                    l = l.concat(tasks)
-                })
-            })
-            .catch((error) => console.log(error));
+        let l = []
+        let classes = data["data"]["student"]
+        const latest = classes.at(-1)
+        const curSemester = latest["semester"]
+        const curYear = latest["year"]
+        classes = classes.filter(x => x["semester"] == curSemester && x["year"] == curYear)
+        for (let e of classes) {
+            let id = e["cv_cid"]
+            let tasks = await fetchClassTasks(id)
+            l = l.concat(tasks)
+            console.log(l)
+        }
         return l
     }
 
     const doStuff = async () => {
-        let l = await fetchMCVTasks()
+        await fetchMCVTasks()
         // let l = await fetchClassName("32205")
         // l.sort((a, b) => a["date"] - b["date"])
-        console.log(l)
     }
 </script>
 
