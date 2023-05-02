@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<script>
+    let arr = [{ "title": "FUCKYOU", "desc": "I love mao zedong", "date": "1989" }];
+
+    const task = (arr) => {
+        let container = document.getElementById("container");
+
+        arr.forEach(obj => {
+            let h1 = document.createElement("h1");
+            h1.innerText = obj.title;
+
+            let d = document.createElement("d");
+            d.innerText = obj.date;
+
+            let p = document.createElement("p");
+            p.innerText = obj.desc;
+
+            let div = document.createElement("div");
+            div.appendChild(h1);
+            div.appendChild(d);
+            div.appendChild(p);
+
+            container.appendChild(div);
+        });
+    }
+
+</script>
+
+<body>
+
+</body>
+
+</html>
