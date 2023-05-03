@@ -1,4 +1,4 @@
-const backendIPAddress = "3.208.199.166:3000"
+const backendIPAddress = "localhost:3000"
 let username = ""
 
 const login = () => {
@@ -305,19 +305,20 @@ const init = async () => {
         logbtn.onclick = () => {
             logout()
         }
+        document.getElementById("loading_text").style.display = 'block'
+        document.getElementById("btn_green").style.display = 'none'
+        document.getElementById("searchbox").disabled = true;
+        await updateData(true) //change this back to TRUE
+        document.getElementById("loading_text").style.display = 'none'
+        document.getElementById("btn_green").style.display = 'block'
+        document.getElementById("searchbox").disabled = false;
+        await updateFilter("")
+        await updateUI()
     } else {
         document.getElementById("searchbox").style.display = 'none'
         document.getElementById("btn_green").style.display = 'none'
         document.getElementById("main_title").innerText = "Please Login with your MCV account first."
 
     }
-    document.getElementById("loading_text").style.display = 'block'
-    document.getElementById("btn_green").style.display = 'none'
-    document.getElementById("searchbox").disabled = true;
-    await updateData(true) //change this back to TRUE
-    document.getElementById("loading_text").style.display = 'none'
-    document.getElementById("btn_green").style.display = 'block'
-    document.getElementById("searchbox").disabled = false;
-    await updateFilter("")
-    await updateUI()
+
 }
